@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "lasttick",
+  "version": "${version}",
+  "name": "LastTick",
+  "description": "Jumps on the last grounded tick before the next tick loses support.",
+  "authors": [
+    "epicshawty"
+  ],
+  "contact": {
+    "homepage": "https://github.com/epicshawty/lasttick",
+    "sources": "https://github.com/epicshawty/lasttick",
+    "issues": "https://github.com/epicshawty/lasttick/issues"
+  },
+  "license": "AGPL-3.0-or-later",
+  "icon": "assets/lasttick/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.epicshawty.lasttick.LastTickClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~26.3",
+    "java": ">=25",
+    "fabric-api": "*"
+  }
+}
