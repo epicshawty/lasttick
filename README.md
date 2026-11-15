@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/epicshawty/lasttick/main/docs/banner.svg" alt="LastTick" width="860">
+![LastTick](docs/banner.svg)
 
 Jumps on the last grounded tick before the next tick loses its block.
 
