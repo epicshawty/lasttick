@@ -74,6 +74,27 @@ public final class EdgeJump {
 		return !probe.blocked(next);
 	}
 
+	/**
+	 * Distance along the current heading, in blocks, to the first position whose swept box has no
+	 * floor. {@code -1} means no edge within {@code maxDistance}. Diagnostic only: it answers
+	 * "does the player's own heading leave support at all" from inside the running game.
+	 */
+	public static double edgeDistance(AABB box, double dx, double dz, double maxDistance, BlockProbe probe) {
+		double length = Math.sqrt(dx * dx + dz * dz);
+
+		if (length < 1.0E-6) {
+			return -1.0;
+		}
+
+		for (double step = 0.1; step <= maxDistance; step += 0.1) {
+			if (leavesSupport(box, dx / length * step, dz / length * step, probe)) {
+				return Math.round(step * 10.0) / 10.0;
+			}
+		}
+
+		return -1.0;
+	}
+
 	/** Collision query, kept separate so the prediction can be checked without a Level. */
 	public interface BlockProbe {
 		boolean blocked(AABB box);

@@ -6,6 +6,9 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,9 +16,11 @@ import org.slf4j.LoggerFactory;
 public final class LastTickClient implements ClientModInitializer {
 	private static final Logger LOG = LoggerFactory.getLogger("lasttick");
 	private static final int FIRE_LOG_LIMIT = 10;
+	private static final int PROBE_LOG_INTERVAL = 20;
 	private static KeyMapping toggleKey;
-	private static boolean toggleWasDown;
 	private static int firesLogged;
+	private static int ticks;
+	private static boolean loggedBinding;
 
 	@Override
 	public void onInitializeClient() {
@@ -27,68 +32,76 @@ public final class LastTickClient implements ClientModInitializer {
 				InputConstants.UNKNOWN.getValue(),
 				KeyMapping.Category.MISC));
 
-		InputConstants.Key bound = boundKey();
-		LOG.info("lasttick: ready, bound={} type={} value={} enabled={}",
-				bound.getName(), bound.getType(), bound.getValue(), Config.enabled());
-
 		ClientTickEvents.START_CLIENT_TICK.register(LastTickClient::onStartTick);
 	}
 
 	private static void onStartTick(Minecraft client) {
-		pollToggle(client);
+		// One channel only: two of them toggle the state twice per press and cancel out.
+		while (toggleKey.consumeClick()) {
+			Config.toggle(LOG, "key event");
+		}
 
-		if (!Config.enabled() || client.player == null || client.level == null) {
+		if (client.player == null || client.level == null) {
 			return;
 		}
 
-		if (EdgeJump.shouldJump(client.player, client.level)) {
-			Vec3 pos = client.player.position();
-			client.player.jumpFromGround();
+		if (!loggedBinding) {
+			loggedBinding = true;
+			InputConstants.Key bound = KeyMappingHelper.getBoundKeyOf(toggleKey);
+			LOG.info("lasttick: bound={} value={} enabled={}", bound.getName(), bound.getValue(), Config.enabled());
+		}
+
+		ticks++;
+
+		if (!Config.enabled()) {
+			return;
+		}
+
+		LocalPlayer player = client.player;
+		ClientLevel level = client.level;
+
+		if (EdgeJump.shouldJump(player, level)) {
+			Vec3 pos = player.position();
+			player.jumpFromGround();
 
 			if (firesLogged < FIRE_LOG_LIMIT) {
 				firesLogged++;
 				LOG.info("lasttick: jump at {}, {}, {}", round(pos.x), round(pos.y), round(pos.z));
 			}
+
+			return;
+		}
+
+		if (ticks % PROBE_LOG_INTERVAL == 0) {
+			probe(player, level);
 		}
 	}
 
 	/**
-	 * Toggles on a raw key edge while in-game.
-	 *
-	 * <p>{@code KeyMapping.consumeClick()} is kept as a second channel, but it cannot be the only one:
-	 * 26.3's {@code KeyMapping.setKey} assigns the bound key without re-registering the mapping in the
-	 * private key-to-mappings index, so a mapping created unbound (as this one is) never receives clicks
-	 * after the user binds it. {@link InputConstants#isKeyDown(int)} reads the same SDL keyboard state
-	 * vanilla reads, indexed by the code the mapping holds.
+	 * One line per second while the player is walking on the ground: the gate values the predicate
+	 * sees, and how far ahead the heading leaves support. {@code edge=-1} with no jumps ever logged
+	 * means the collision query never reports air, i.e. the predicate cannot fire at all.
 	 */
-	private static void pollToggle(Minecraft client) {
-		while (toggleKey.consumeClick()) {
-			Config.toggle(LOG, "key event");
+	private static void probe(LocalPlayer player, ClientLevel level) {
+		Vec3 velocity = player.getDeltaMovement();
+		double dx = velocity.x;
+		double dz = velocity.z;
+
+		if (!player.onGround() || dx * dx + dz * dz < 2.5E-3) {
+			return;
 		}
 
-		boolean down = client.gui != null && client.gui.screen() == null && keyHeld();
+		AABB box = player.getBoundingBox();
+		EdgeJump.BlockProbe probe = b -> level.getBlockCollisions(player, b).iterator().hasNext();
+		boolean nextSupported = !EdgeJump.leavesSupport(box, dx, dz, probe);
 
-		if (down && !toggleWasDown) {
-			Config.toggle(LOG, "key state");
-		}
-
-		toggleWasDown = down;
-	}
-
-	private static boolean keyHeld() {
-		InputConstants.Key key = boundKey();
-
-		if (key.getType() == InputConstants.Type.KEYBOARD) {
-			int code = key.getValue();
-			return code >= 0 && code < 512 && InputConstants.isKeyDown(code);
-		}
-
-		return toggleKey.isDown();
-	}
-
-	private static InputConstants.Key boundKey() {
-		InputConstants.Key key = KeyMappingHelper.getBoundKeyOf(toggleKey);
-		return key == null ? InputConstants.UNKNOWN : key;
+		LOG.info("lasttick: probe spd={} mayfly={} crouch={} jumpHeld={} nextSupported={} edge={}",
+				Math.round(Math.sqrt(dx * dx + dz * dz) * 1000.0),
+				player.getAbilities().mayfly,
+				player.isCrouching(),
+				player.input.keyPresses.jump(),
+				nextSupported,
+				EdgeJump.edgeDistance(box, dx, dz, 3.0, probe));
 	}
 
 	private static long round(double value) {
