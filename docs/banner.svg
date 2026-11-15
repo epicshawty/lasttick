@@ -33,10 +33,8 @@
         font-family="Segoe UI, Helvetica Neue, Helvetica, Arial, sans-serif"
         font-size="20" font-weight="500" letter-spacing="7" fill="#8f97a3">ONE TICK EARLIER IS TOO LATE</text>
 
-  <!-- the ledge the mod is about: floor, a gap, floor again, and the cube on the lip -->
+  <!-- the ledge the mod is about: floor, then nothing, and the cube on the lip -->
   <rect x="0" y="296" width="622" height="24" fill="#2b313a"/>
   <rect x="0" y="296" width="622" height="4" fill="#474f5c"/>
-  <rect x="654" y="306" width="626" height="14" fill="#20242b"/>
-  <rect x="654" y="306" width="626" height="3" fill="#343b45"/>
   <rect x="594" y="276" width="22" height="22" rx="3" fill="#3ddc84"/>
 </svg>
