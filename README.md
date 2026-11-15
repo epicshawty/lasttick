@@ -11,7 +11,7 @@ Jumps on the last grounded tick before the next tick loses its block.
 <a href="https://fabricmc.net/develop"><img src="https://img.shields.io/badge/Fabric_API-0.166.2%2B26.3-d0c7bd?style=flat-square" alt="Fabric API 0.166.2+26.3"></a>
 <a href="https://adoptium.net"><img src="https://img.shields.io/badge/Java-25-ed8b00?style=flat-square&logo=openjdk&logoColor=white" alt="Java 25"></a>
 
-<a href="https://github.com/epicshawty/lasttick/releases/latest"><img src="https://img.shields.io/badge/release-1.0.0-f25202?style=flat-square" alt="Release 1.0.0"></a>
+<a href="https://github.com/epicshawty/lasttick/releases/latest"><img src="https://img.shields.io/badge/release-1.0.1-f25202?style=flat-square" alt="Release 1.0.1"></a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0--or--later-blue?style=flat-square" alt="AGPL-3.0-or-later"></a>
 <img src="https://img.shields.io/badge/mixins-none-4c566a?style=flat-square" alt="No mixins">
 <img src="https://img.shields.io/badge/feedback-none-4c566a?style=flat-square" alt="No feedback">
@@ -58,6 +58,10 @@ Any ledge counts, including a six-block drop. A single-block step down counts to
 | Feedback | none — no chat, toast, sound, HUD or action bar |
 | Persistence | `config/lasttick.json` |
 | Side | client only |
+| Ignored while | a screen is open (binding it in Controls does not fire it) |
+
+Confirm state without feedback: `config/lasttick.json`, or `logs/latest.log` — `lasttick: enabled=true (key state)`
+per toggle, and one `lasttick: jump at x, y, z` per jump (first ten).
 
 ---
 
@@ -70,7 +74,7 @@ Any ledge counts, including a six-block drop. A single-block step down counts to
 ## Install
 
 ```bash
-cp lasttick-1.0.0.jar ~/.minecraft/mods/
+cp lasttick-1.0.1.jar ~/.minecraft/mods/
 ```
 
 Then bind `Assist`, press it once, walk off something.

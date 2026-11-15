@@ -21,8 +21,9 @@ public final class Config {
 		return enabled;
 	}
 
-	public static void toggle(Logger log) {
+	public static void toggle(Logger log, String source) {
 		enabled = !enabled;
+		log.info("lasttick: enabled={} ({})", enabled, source);
 		save(log);
 	}
 
