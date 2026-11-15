@@ -29,7 +29,7 @@ The parkour macro Dream used in MCC, rebuilt by an AI and shipped in public.
 ## Where this came from
 
 MCC 11, 2020. Dream gets accused of running an auto jump macro during the parkour. The evidence was a
-slowed down clip and a screenshot with a red circle drawn on it. The defence was a Google Doc with more words
+slowed-down clip and a screenshot with a red circle drawn on it. The defence was a Google Doc with more words
 in it than this entire codebase. Half the subreddit wanted him drawn and quartered, the other half wanted him
 elected president of Minecraft, and a genuinely alarming number of people are still arguing about it.
 
