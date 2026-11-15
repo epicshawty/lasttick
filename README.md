@@ -2,7 +2,7 @@
 
 <img src="https://raw.githubusercontent.com/epicshawty/lasttick/main/docs/banner.svg" alt="LastTick" width="860">
 
-A vibe-coded, AI-generated reimplementation of the parkour macro Dream used in MCC.
+The parkour macro Dream used in MCC, rebuilt by an AI and shipped in public.
 
 <br>
 
@@ -22,99 +22,111 @@ A vibe-coded, AI-generated reimplementation of the parkour macro Dream used in M
 
 ---
 
-> **This is a macro, not a mod.** It decides when you jump, using information your eyes were supposed to
-> process manually. Servers call that cheating, anticheats call it a fun afternoon, and the subreddit calls
-> it a 47-minute video essay. Single player, your own realm, or a private server where everyone else is
-> running it too.
+> This is a cheat. Not a mod, not a utility, not "accessibility". It decides whether to jump inside the 50
+> milliseconds a tick gives you, and it decides correctly every time. Take it onto a server that didn't agree
+> to this and you will get banned, and I'm not writing you a comforting paragraph about it afterwards.
 
-## The origin story, in which nobody learns anything
+## Where this came from
 
-In 2020 Dream was accused of running an auto-jump macro during MCC parkour. The evidence was eleven frames of
-video and a collective mood. The defence was a Google Doc. The verdict was a discourse that outlived several
-hard drives. Nobody ever saw the jar.
+MCC 11, 2020. Dream gets accused of running an auto jump macro during the parkour. The evidence was a
+slowed down clip and a screenshot with a red circle drawn on it. The defence was a Google Doc with more words
+in it than this entire codebase. Half the subreddit wanted him drawn and quartered, the other half wanted him
+elected president of Minecraft, and a genuinely alarming number of people are still arguing about it.
 
-Now there is a jar. It is roughly 150 lines of Java, produced by an AI that was asked "make it jump on the
-last possible tick" and then left unsupervised in a Gradle project for one afternoon. No config screen, no
-particles, no advancements, no lore, no moderation dashboard, no apology. It does one dishonest thing and
-then waits.
+Six years on, the scoreboard reads: nobody proved it, nobody produced the jar, the argument is still going in
+a subreddit thread that's older than some of the competitors. So I had a bot write the jar. One afternoon,
+about 150 lines of Java, zero oversight.
 
-Every other README in this category would now claim the code is battle-tested and used by thousands. This one
-has a [Status](#status-confirmed-working-but-read-the-table) section instead, and the table in it is not
-flattering.
+There's no deeper point here. It's a cheat for a children's game that got generated because the discourse
+annoyed me and because "make it jump on the last possible tick" is a stupidly funny thing to ask a language
+model.
 
-## How the cheating works, mechanically
+## What it does
 
-Every client tick, before vanilla processes your keyboard:
+Every client tick, before vanilla reads your keyboard:
 
 | Step | What happens |
 |:---|:---|
-| Predict | Take today's position and add `deltaMovement` — that is literally the box vanilla moves you to next tick |
-| Probe | Drop that box 1/16 of a block and ask the level for real block collisions |
-| Decide | Nothing under it, and this tick still has floor → jump now |
+| Predict | Take where you are and add `deltaMovement`. That's the exact box vanilla is about to shove you into |
+| Probe | Drop that box a sixteenth of a block and ask the level for real block collisions |
+| Decide | Nothing under it, and you've still got floor this tick, so jump |
 
-No look-ahead samples, no tuned scan distance, no "aggression" slider to pretend the thing is configurable.
-One vector addition and one collision query. That is somehow the entire mod.
+One vector addition and one collision query. There's no look-ahead sampling, no scan distance to tune, no
+"aggression" slider, no config screen pretending this thing has opinions. If you came here for nuance, you're
+on the wrong repository and possibly the wrong website.
 
-## Why it's the *last* tick and not the second-to-last
+## Why the last tick is the last tick
 
-`jumpFromGround` requires `onGround`. One tick after the prediction fails you are airborne, and the game will
-not let you jump no matter how sincerely you mash space. So the final tick with a block under you is not "a
-good time to jump" — it is the only remaining time a jump exists. That is physics, not taste, and it is the
-one part of this repository that is not slop.
+`jumpFromGround` needs `onGround`. One tick after the prediction fails you are in the air, and the game does
+not care how hard you mash the spacebar. So the final tick with a block underneath you isn't a good time to
+jump. It's the only tick where jumping is still a thing that exists. Anyone who has ever missed a jump by one
+frame knows this in their teeth.
 
-## Things that stop it
+## Shit that stops it
 
-| Gate | Why it's there |
+| Gate | Why |
 |:---|:---|
-| `onGround` | Can't jump mid-air. Tried. |
-| Speed ≥ 0.05 blocks/tick | Standing at an edge is not "walking off" it |
-| Sneaking / crouching | Vanilla already stops you at edges; jumping would be a betrayal |
-| Water, lava, ladders, vines | Different physics, different mod, different cheat |
-| Spectator, passenger, elytra | Not a walk |
-| `mayfly` / flying | Creative players have flight; a mod that yanks you off the ground there is a hazard |
-| Jump key already held | You are already jumping. It can tell. |
+| `onGround` | You can't jump in the air. I checked. |
+| Speed under 0.05 blocks/tick | Standing at the edge looking at the drop isn't walking off it |
+| Sneaking or crouching | Vanilla already refuses to walk you off ledges there. Jumping would be a betrayal of trust |
+| Water, lava, ladders, vines | Different physics, different mod, different flavour of cheating |
+| Spectator, passenger, elytra | None of those are walking |
+| `mayfly` and creative flight | Creative players can already fly. Yanking them off the ground would just be rude |
+| Jump key already down | You're already jumping. It's not going to fight you about it |
 
-Any ledge counts, including a six-block drop, including a single-block step down, because the block does in
-fact end there. If that annoys you, that is a philosophical disagreement with the premise, not a bug.
+Every ledge counts. Six block drop, one block step down, doesn't matter, the block ends either way. If that
+bothers you then you have a philosophical problem with the premise and not with the code.
 
-## The toggle nobody can see
+## The switch nobody can see
 
-`Controls → Miscellaneous → Assist`. Unbound by default. No chat message, no toast, no sound, no particle, no
-boss bar, no hotbar flash, no Discord webhook. The entire feedback budget of this software is a line in
-`logs/latest.log`:
+`Controls → Miscellaneous → Assist`. Unbound by default. No chat message. No toast, no sound, no particle, no
+boss bar, no hotbar flash, no webhook to a Discord server where your friends can watch you get clipped.
+
+That was your call. Also it's just good practice: a cheat that announces itself is a cheat that gets you
+banned by Friday.
+
+What you get instead is a line in `logs/latest.log`:
 
 ```
 lasttick: enabled=true (key event)
 ```
 
-Two other ways to tell, both requiring you to leave the game: `config/lasttick.json`, and the apoplectic tone
-of the person who just watched you clear a gap you had no business clearing.
+Two other ways to check, both of which require leaving the game: `config/lasttick.json`, and the tone of
+whoever just watched you clear a gap you had no business clearing.
 
-While armed it also writes one `lasttick: probe …` line per second of ground movement, listing every gate and
-the distance along your heading to the first unsupported position. That is not a feature. That is a diagnostic
-that shipped because two releases in a row were broken in ways this exact line would have explained in ten
-seconds.
+While it's armed it also writes one `lasttick: probe ...` line per second of walking, listing every gate and
+how far ahead the floor runs out. I didn't put those in for you. They're there because I broke the mod twice
+in a row and guessing was getting expensive.
 
-## Status: confirmed working, but read the table
+## Honest status, because the badges above are decoration
 
 | Claim | Reality |
 |:---|:---|
-| Jumps on the last tick | Verified offline on a synthetic ledge (fires on the tick the box is still on the floor, not the one after), and confirmed in a live survival world |
-| Works in creative | No, deliberately — `mayfly` is a gate |
-| The keybind reads your mind | It reads `consumeClick()`. That is not the same thing |
-| Zero bugs ever shipped | 1.0.0 shipped with the predicate unreachable, 1.0.1 shipped a "fix" that toggled twice per press and cancelled itself out, 1.0.2 is the one that works |
-| Tested | Zero test files in the repo. The offline geometry harness lives outside it, because committing it would have required a decision |
+| Jumps on the last tick | Checked offline on a fake ledge, then checked in a real survival world. It does the thing |
+| Works in creative | No, on purpose. `mayfly` is a gate |
+| Zero bugs ever shipped | 1.0.0 shipped with the predicate unreachable. 1.0.1 shipped a fix that toggled twice per press and cancelled itself out. 1.0.2 is the one that works |
+| Tested | No test files in here. The offline harness lives on my disk, because adding it to the repo would have required making a decision |
 
-If it ever stops working, `logs/latest.log` names the gate that refused: bind the key, press it once, look for
-`lasttick: bound=… enabled=true`, then walk with it armed and read the `probe` lines. This is more logging than
-the mod deserves and less than it needs.
+If it ever stops, `logs/latest.log` will tell you which gate refused. Bind the key, press it once, look for
+`lasttick: bound=... enabled=true`, then walk around with it on and read the probe lines. That's the whole
+support plan.
 
-## Requirements
+## FAQ
 
-- Minecraft 26.3, Fabric Loader ≥ 0.16.0
+**Will this get me banned?** On any server with a brain or a plugin, yes. Singleplayer, a realm you own, or a
+private server where the admin is running it too. That's the whole list.
+
+**Does it work in creative?** No. It's in the table above. Read the table.
+
+**Why is there no config screen?** There's one setting and it's a switch, and the switch is your keybind. Any
+more UI than that would be lying to you about how much is going on in here.
+
+## You need
+
+- Minecraft 26.3, Fabric Loader 0.16.0 or newer
 - Fabric API
 - Java 25
-- A server that does not read the logs
+- A server that doesn't read its own logs
 
 ## Install
 
@@ -122,24 +134,24 @@ the mod deserves and less than it needs.
 cp lasttick-1.0.2.jar ~/.minecraft/mods/
 ```
 
-Bind `Assist`, press it once, walk off something. There is no HUD, so "did it turn on" is a leap of faith
+Bind `Assist`, press it once, then walk off something. There's no HUD, so "did it turn on" is a leap of faith
 followed immediately by a fall.
 
 ## Versions
 
-Semantic versioning, one tag per release, jar attached to the tag by GitHub Actions, because a human cannot
-be trusted to remember `./gradlew build` before uploading.
+Semver, one tag per release, jar attached to the tag by GitHub Actions, because I cannot be trusted to
+remember `./gradlew build` before clicking upload.
 
 | Bump | Meaning here |
 |:---|:---|
 | major | config path or mod id changes, or Minecraft does |
-| minor | new gate, or a behaviour change you can feel |
-| patch | a fix that doesn't fix anything you asked for |
+| minor | new gate, or something you can feel |
+| patch | a fix for something you didn't ask me to break |
 
 ## License
 
-AGPL-3.0-or-later — the most copyleft thing available without involving a lawyer. Full text in
-[LICENSE](LICENSE).
+AGPL-3.0-or-later, the most copyleft thing you can get without hiring a lawyer. Full text in [LICENSE](LICENSE).
 
-Not affiliated with Dream, MCC, Mojang, Microsoft, or any anticheat vendor. No Mojang code is redistributed
-here. The premise is a joke; the collision maths is not.
+Not affiliated with Dream, MCC, Mojang, Microsoft, or anybody who runs an anticheat. No Mojang code is
+redistributed here. The premise is a joke, the collision maths isn't, and if you got banned that's between you
+and your god.
